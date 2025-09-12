@@ -32,9 +32,21 @@ dx = 0.05e-9
 
 dt_max = 0.15 * 2 * m * dx**2 / hbar
 dt = 0.5*dt_max
-Nt = 20
+
 
 Nx = int(Lx/dx) + 1
+
+print('Nx :' , {Nx})
+
+t_max = 500*10**-15
+
+Nt = 200#int(t_max/dt) + 1 
+
+print('\nNt :' , {Nt})
+
+# Guardar snapshots cada Nskip pasos
+Nskip = max(1, Nt // 100)  # ajustá 100 según la cantidad de snapshots que quieras
+
 
 ra = hbar*dt/(2*m*dx**2)
 
@@ -102,12 +114,17 @@ data_to_plot = []
 # Esto es la discretización explícita de Schrödinger.
 
 
+
+
 # n recorre los pasos de tiempo, de 0 hasta Nt-1.
 
 # psiR_old y psiI_old son copias de la función de onda en el paso anterior, necesarias porque la actualización explícita requiere los valores antiguos.
 
 # Cada iteración de este ciclo representa un incremento temporal de dt segundos.
 
+# Condiciones de contorno
+psi_real[0] = psi_real[-1] = 0.0
+psi_imag[0] = psi_imag[-1] = 0.0
 
 for n in range(Nt):
     psiR_old = psi_real.copy()
@@ -116,9 +133,8 @@ for n in range(Nt):
     for i in range(1, Nx-1):
         
         psi_real[i] = psiR_old[i] + dt * ( C1 * (psiI_old[i+1] - 2*psiI_old[i] + psiI_old[i-1]) / dx**2 + C2 * V[i] * psiI_old[i] )
-        
         psi_imag[i] = psiI_old[i] - dt * ( C1 * (psiR_old[i+1] - 2*psiR_old[i] + psiR_old[i-1]) / dx**2 + C2 * V[i] * psiR_old[i] )
-
+       
     # Condiciones de contorno
     psi_real[0] = psi_real[-1] = 0.0
     psi_imag[0] = psi_imag[-1] = 0.0
@@ -128,7 +144,8 @@ for n in range(Nt):
     psi_real /= norm
     psi_imag /= norm
 
-    if n % 400 == 0:
+   # Guardar snapshots
+    if n % Nskip == 0 or n == Nt-1:
         prob_density = psi_real**2 + psi_imag**2
         data_to_plot.append((n*dt, psi_real.copy(), psi_imag.copy(), prob_density.copy()))
 
@@ -136,6 +153,7 @@ for n in range(Nt):
 
 P_total = np.sum(prob_density) * dx  # suma discreta ≈ integral
 print(f"Probabilidad total: {P_total:.4f}")  # debería estar cerca de 1 si está normalizado
+
 
 # --- Ploteo ---
 plt.figure(figsize=(12,6))
@@ -163,4 +181,39 @@ plt.xlabel("x (nm)")
 plt.ylabel("Amplitud / Densidad")
 plt.title("Evolución de un paquete de onda en 1D (electrón)")
 plt.legend()
+plt.show()
+
+
+## Graficos de los tiempos :
+
+
+print(f"Número de snapshots guardados: {len(data_to_plot)}")
+print("Tiempos guardados (fs):")
+for t_snapshot, _, _, _ in data_to_plot:
+    print(f"{t_snapshot*1e15:.2f} fs")
+
+#los tiempos que queremos graficar
+times_to_plot = [0, 30e-15, 70e-15, 440e-15]
+
+#contamos cuántos subplots necesitamos
+n_plots = len(times_to_plot)
+
+fig, axes = plt.subplots(n_plots, 1, figsize=(12, 3*n_plots), sharex=True)
+
+for ax, t_target in zip(axes, times_to_plot):
+    #buscamos el snapshot más cercano a t_target
+    closest_snapshot = min(data_to_plot, key=lambda s: abs(s[0] - t_target))
+    t_snapshot, psiR, psiI, prob = closest_snapshot
+    
+    ax.plot(x*1e9, 5000*psiR, color='blue', alpha=0.6, label='Re(Ψ) × 5000')
+    ax.plot(x*1e9, 5000*psiI, color='red', alpha=0.6, label='Im(Ψ) × 5000')
+    ax.plot(x*1e9, prob, color='green', alpha=0.8, label='|Ψ|²')
+    
+    ax.set_ylabel("Amplitud / Densidad")
+    ax.set_title(f"t = {t_snapshot*1e15:.0f} fs")
+    ax.legend(loc='upper right')
+
+axes[-1].set_xlabel("x (nm)")
+
+plt.tight_layout()
 plt.show()
