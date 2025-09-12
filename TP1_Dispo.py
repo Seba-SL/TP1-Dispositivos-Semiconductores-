@@ -40,12 +40,12 @@ print('Nx :' , {Nx})
 
 t_max = 500*10**-15
 
-Nt = 200#int(t_max/dt) + 1 
+Nt = 500#int(t_max/dt) + 1 
 
 print('\nNt :' , {Nt})
 
 # Guardar snapshots cada Nskip pasos
-Nskip = max(1, Nt // 100)  # ajustá 100 según la cantidad de snapshots que quieras
+Nskip = max(1, Nt // 500)  # ajustá 100 según la cantidad de snapshots que quieras
 
 
 ra = hbar*dt/(2*m*dx**2)
@@ -74,9 +74,10 @@ V = np.zeros_like(x)
 # --- Condición inicial ---
 x0 = 110e-9
 sigma = 4e-9
-k0 = 10e8 
+l_onda = 5.45e-9
+k0 = 2*np.pi/l_onda
 
-envelope = np.exp(-(x-x0)**2/(2*sigma**2))
+envelope = np.exp(-(x-x0)**2/(sigma**2))
 psi_real = envelope * np.cos(k0*(x-x0))
 psi_imag = envelope * np.sin(k0*(x-x0))
 
@@ -151,7 +152,7 @@ for n in range(Nt):
 
 # --- Ploteo ---
 
-P_total = np.sum(prob_density) * dx  # suma discreta ≈ integral
+P_total = np.sum(prob_density)* dx  # suma discreta ≈ integral
 print(f"Probabilidad total: {P_total:.4f}")  # debería estar cerca de 1 si está normalizado
 
 
@@ -208,7 +209,7 @@ for ax, t_target in zip(axes, times_to_plot):
     ax.plot(x*1e9, 5000*psiR, color='blue', alpha=0.6, label='Re(Ψ) × 5000')
     ax.plot(x*1e9, 5000*psiI, color='red', alpha=0.6, label='Im(Ψ) × 5000')
     ax.plot(x*1e9, prob, color='green', alpha=0.8, label='|Ψ|²')
-    
+ 
     ax.set_ylabel("Amplitud / Densidad")
     ax.set_title(f"t = {t_snapshot*1e15:.0f} fs")
     ax.legend(loc='upper right')
@@ -217,3 +218,4 @@ axes[-1].set_xlabel("x (nm)")
 
 plt.tight_layout()
 plt.show()
+
