@@ -178,7 +178,11 @@ for psi_sqr, t in zip(psi_sqr_snapshots, times):
         plt.plot(x*1e9, psi_sqr, label=fr"$|\Psi|^2, \; t = {t:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
 
 
-plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV , d = {d_nm} nm" , color ="gray", linewidth = 3 )
+
+plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV " , color ="gray", linewidth = 3 )
+  
+#caso barreras   
+#plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV , d = {d_nm} nm" , color ="gray", linewidth = 3 )
   
     
     
