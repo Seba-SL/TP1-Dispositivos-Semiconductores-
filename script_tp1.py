@@ -51,6 +51,9 @@ envelope = np.exp(-(x-x0)**2/(2*sigma**2))
 psi_real = envelope * np.cos(k0*(x-x0))
 psi_imag = envelope * np.sin(k0*(x-x0))
 
+
+
+
 # Normalización inicial
 norm = np.sqrt(np.trapz(psi_real**2 + psi_imag**2, x))
 psi_real /= norm
@@ -87,6 +90,15 @@ E_total = Ek_mean + Ep_mean
 # --- Snapshots ---
 psi_sqr_snapshots = []
 times = []
+
+
+
+plt.figure(figsize=(8,5))
+
+#Solo Para condiciones iniciales
+#Componentes Real e imaginaria en tiempo 0 
+#plt.plot(x*1e9, psi_real*5000, label=fr"$\Psi_Real, \; t = {0:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
+#plt.plot(x*1e9, psi_imag*5000, label=fr"$\Psi_Imag, \; t = {0:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
 
 
 # --- Evolución temporal ---
@@ -129,17 +141,22 @@ print(f"<E>   = {E_total/eV:.3f} eV")
 
 
 # --- Graficar snapshots en tiempos específicos ---
+
+#Solo Para condiciones iniciales
+#target_times = [0]  # en femtosegundos
 target_times = [0, 30, 80, 450]  # en femtosegundos
 tolerance = 0.5  # tolerancia en fs para encontrar el snapshot más cercano
 
-plt.figure(figsize=(8,5))
 
 for psi_sqr, t in zip(psi_sqr_snapshots, times):
     # revisar si t está cerca de alguno de los tiempos objetivo
     if any(abs(t - T) < tolerance for T in target_times):
         plt.plot(x*1e9, psi_sqr, label=fr"$|\Psi|^2, \; t = {t:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
-
+      
 plt.plot(x*1e9,V,label = f"V(x) = {V[0]} eV", linestyle = "--", color ="gray", linewidth = 2.5)
+
+
+
 
 textstr = (
     f'P_total = {P_total:.4f}\n'
@@ -157,7 +174,7 @@ textstr = (
 
 # Coordenadas relativas del cuadro (x, y) en fracción de la figura (0 a 1)
 plt.gca().text(
-    0.1, 0.95, textstr,
+    0.025, 0.95, textstr,
     transform=plt.gca().transAxes,
     fontsize=10,
     verticalalignment='top',
@@ -169,48 +186,3 @@ plt.ylabel("Densidad de probabilidad")
 plt.legend()
 plt.show()
 
-# # --- Evolución temporal ---
-# snapshot_times_fs = [0, 30, 80, 450]  # tiempos deseados en fs
-# psi_sqr_snapshots = []
-# times = []
-
-# for n in range(Nt):
-#     # Laplaciano
-#     lap_real = (np.roll(psi_real,-1) - 2*psi_real + np.roll(psi_real,1)) / dx**2
-#     lap_imag = (np.roll(psi_imag,-1) - 2*psi_imag + np.roll(psi_imag,1)) / dx**2
-
-#     # Ecuación de Schrödinger explícita
-#     psi_real_new = psi_real + dt*( -(hbar/(2*m))*lap_imag + (V/hbar)*psi_imag )
-#     psi_imag_new = psi_imag + dt*(  (hbar/(2*m))*lap_real  - (V/hbar)*psi_real )
-
-#     psi_real, psi_imag = psi_real_new, psi_imag_new
-
-#     # tiempo actual en fs
-#     t_fs = n * dt * 1e15
-
-#     # Guardar solo los snapshots más cercanos a los tiempos deseados
-#     for t_target in snapshot_times_fs:
-#         if len(times) < len(snapshot_times_fs) and abs(t_fs - t_target) < dt*1e15:
-#             psi_sqr = psi_real**2 + psi_imag**2
-#             psi_sqr_snapshots.append(psi_sqr.copy())
-#             times.append(t_fs)
-#             # Normalización opcional
-#             norm = np.sqrt(np.trapz(psi_real**2 + psi_imag**2, x))
-#             psi_real /= norm
-#             psi_imag /= norm
-#             break  # evita duplicados
-
-# # --- Gráfico ---
-# fig, ax1 = plt.subplots()
-# for i, psi_sqr in enumerate(psi_sqr_snapshots):
-#     ax1.plot(x_nm, psi_sqr, label=f"t = {times[i]:.1f} fs")
-
-# ax1.set_xlabel("x [nm]")
-# ax1.set_ylabel(r"$|\psi(x,t)|^2$")
-# ax1.legend()
-
-# # Potencial
-# ax2 = ax1.twinx()
-# ax2.set_ylabel("Potencial [eV]")
-# plt.title("Evolución Temporal Paquete de Ondas")
-# plt.show()
