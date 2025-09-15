@@ -37,37 +37,6 @@ ra = hbar * dt / (2*m*dx**2)
 if ra >= 0.15:
     raise ValueError("Condición de estabilidad no cumplida: ra >= 0.15")
 
-
-
-# --- Potencial: escalón en x = 20 nm ---
-V = np.zeros(Nx)
-# Escalón de potencial
-
-
-# 0.025 eV
-#V[x < Lx/2] = 0*eV
-#V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
-
-# 0.25 eV
-# V[x < Lx/2] = 0*eV
-# V[x >= Lx/2] =0.25 * eV  # 0.25 eV a partir de x = Lx/2
-
-
-# # Potencial barrera
-Ebarr = 0.150 * eV  # convertir eV a Joules
-d_nm = 10            # ancho en nanómetros, cambia a 1, 2 o 10 según el caso
-d = d_nm * 1e-9     # convertir a metros
-
-V = np.zeros(Nx)    # inicializar el potencial
-x_start = Lx/2
-
-# # indices de la barrera
-idx_start = np.argmin(np.abs(x - x_start))
-idx_end   = np.argmin(np.abs(x - (x_start + d)))
-
-V[idx_start:idx_end] = Ebarr
-
-
 p0 = np.sqrt(2 * m * Ek0)
 lambda0 = h/ p0
 k0 = 2 * np.pi / lambda0
@@ -77,6 +46,43 @@ envelope = np.exp(-(x-x0)**2/(2*sigma**2))
 psi_real = envelope * np.cos(k0*(x-x0))
 psi_imag = envelope * np.sin(k0*(x-x0))
 
+
+
+
+
+############################ Potenciales  #########################################################
+
+
+# --- Potencial: escalón en x = 20 nm ---
+V = np.zeros(Nx)
+
+# Escalón de potencial
+
+# 0.025 eV
+V[x < Lx/2] = 0*eV
+V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
+
+# 0.25 eV
+# V[x < Lx/2] = 0*eV
+# V[x >= Lx/2] =0.25 * eV  # 0.25 eV a partir de x = Lx/2
+
+
+# # Potencial barrera
+# Ebarr = 0.150 * eV  # convertir eV a Joules
+# d_nm = 10            # ancho en nanómetros, cambia a 1, 2 o 10 según el caso
+# d = d_nm * 1e-9     # convertir a metros
+
+# V = np.zeros(Nx)    # inicializar el potencial
+# x_start = Lx/2
+
+# # # indices de la barrera
+# idx_start = np.argmin(np.abs(x - x_start))
+# idx_end   = np.argmin(np.abs(x - (x_start + d)))
+
+# V[idx_start:idx_end] = Ebarr
+
+
+##############################################################################################
 
 
 
@@ -109,8 +115,10 @@ plt.figure(figsize=(8,5))
 
 #Solo Para condiciones iniciales
 #target_times = [0]  # en femtosegundos
+
+# Para evoluciónes temporales
 target_times = [0, 30, 80, 450]  # en femtosegundos
-tolerance = 0.5  # tolerancia en fs para encontrar el snapshot más cercano
+tolerance = dt*1e15/2  # mitad de un paso temporal en fs, para calcular bien los valores esperados 
 
 
 # --- Evolución temporal ---
@@ -126,10 +134,6 @@ for n in range(Nt):
 
     # Actualizar variables
     psi_real, psi_imag = psi_real_new, psi_imag_new
-    # # Aplicar máscara absorbente en cada paso
-    # if(n > Nt -1 ): 
-    #     psi_real *= mask
-    #     psi_imag *= mask
 
     # Calcular densidad de probabilidad
     prob_density = psi_real**2 + psi_imag**2
@@ -167,7 +171,7 @@ for n in range(Nt):
 
 # --- Graficar snapshots en tiempos específicos ---
 
-
+tolerance = 0.5  # tolerancia en fs para encontrar el snapshot más cercano
 for psi_sqr, t in zip(psi_sqr_snapshots, times):
     # revisar si t está cerca de alguno de los tiempos objetivo
     if any(abs(t - T) < tolerance for T in target_times):
@@ -189,13 +193,7 @@ textstr = (
     f'ra = {ra:.4f}\n'
     f'Δt = {dt:.2e} s\n'
     f'Δx = {dx:.2e} m\n'
-    # f'\n--- Valores esperados (t = 0) ---\n'
-    # f'<x>   = {x_mean:.3e} m\n'
-    # f'<p>   = {p_mean:.3e} kg·m/s\n'
-    # f'<Ek>  = {Ek_mean/eV:.3f} eV\n'
-    # f'<Ep>  = {Ep_mean/eV:.3f} eV\n'
-    # f'<E>   = {E_total/eV:.3f} eV\n'
-
+   
 )
 
 # Coordenadas relativas del cuadro (x, y) en fracción de la figura (0 a 1)
