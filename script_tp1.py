@@ -24,7 +24,16 @@ Nt = int(500e-15/dt)
 
 # --- Potencial: escalón en x = 20 nm ---
 V = np.zeros(Nx)
-#V[x_nm >= Lx/2 ] = 0.015*eV   # 0.015 eV
+# Escalón de potencial
+
+
+# 0.025 eV
+#V[x < Lx/2] = 0*eV
+#V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
+
+# 0.25 eV
+V[x < Lx/2] = 0*eV
+V[x >= Lx/2] =0.25 * eV  # 0.25 eV a partir de x = Lx/2
 
 # --- Condición inicial: paquete gaussiano ---
 x0 = 110e-9
@@ -91,6 +100,7 @@ E_total = Ek_mean + Ep_mean
 psi_sqr_snapshots = []
 times = []
 
+idx = np.argmin(np.abs(x - Lx/2))
 
 
 plt.figure(figsize=(8,5))
@@ -152,11 +162,15 @@ for psi_sqr, t in zip(psi_sqr_snapshots, times):
     # revisar si t está cerca de alguno de los tiempos objetivo
     if any(abs(t - T) < tolerance for T in target_times):
         plt.plot(x*1e9, psi_sqr, label=fr"$|\Psi|^2, \; t = {t:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
-      
-plt.plot(x*1e9,V,label = f"V(x) = {V[0]} eV", linestyle = "--", color ="gray", linewidth = 2.5)
 
 
+plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV" , color ="gray", linewidth = 3 )
+  
+        
+    
 
+
+#plt.plot(x*1e9, V/eV, linestyle='--', color='gray', label="V(x) [eV]")
 
 textstr = (
     f'P_total = {P_total:.4f}\n'
