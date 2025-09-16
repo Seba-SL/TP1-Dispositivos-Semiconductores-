@@ -59,8 +59,8 @@ V = np.zeros(Nx)
 # Escalón de potencial
 
 # 0.025 eV
-V[x < Lx/2] = 0*eV
-V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
+#V[x < Lx/2] = 0*eV
+#V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
 
 # 0.25 eV
 #V[x < Lx/2] = 0*eV
@@ -68,18 +68,18 @@ V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
 
 
 # # Potencial barrera
-# Ebarr = 0.150 * eV  # convertir eV a Joules
-# d_nm = 10            # ancho en nanómetros, cambia a 1, 2 o 10 según el caso
-# d = d_nm * 1e-9     # convertir a metros
+Ebarr = 0.150 * eV  # convertir eV a Joules
+d_nm = 10           # ancho en nanómetros, cambia a 1, 2 o 10 según el caso
+d = d_nm * 1e-9     # convertir a metros
 
-# V = np.zeros(Nx)    # inicializar el potencial
-# x_start = Lx/2
+V = np.zeros(Nx)    # inicializar el potencial
+x_start = Lx/2
 
 # # # indices de la barrera
-# idx_start = np.argmin(np.abs(x - x_start))
-# idx_end   = np.argmin(np.abs(x - (x_start + d)))
+idx_start = np.argmin(np.abs(x - x_start))
+idx_end   = np.argmin(np.abs(x - (x_start + d)))
 
-# V[idx_start:idx_end] = Ebarr
+V[idx_start:idx_end] = Ebarr
 
 
 ##############################################################################################
@@ -202,10 +202,10 @@ for psi_sqr, t in zip(psi_sqr_snapshots, times):
 
 
 #Casos Escalones y Particula libre 
-plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV " , color ="gray", linewidth = 3 )
+#plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV " , color ="gray", linewidth = 3 )
   
 #caso barreras   
-#plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV , d = {d_nm} nm" , color ="gray", linewidth = 3 )
+plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV , d = {d_nm} nm" , color ="gray", linewidth = 3 )
   
     
     
