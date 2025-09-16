@@ -209,7 +209,7 @@ plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f
   
     
     
-for T, x_val, p_val, Ek_val, Ep_val, E_val, delta_x, delta_p in zip(target_times, x_means, p_means, Ek_means, Ep_means, E_totals, deltas_x,deltas_p,productos_deltas_normalizados):
+for T, x_val, p_val, Ek_val, Ep_val, E_val, delta_x, delta_p, producto_deltas_normalizado in zip(target_times, x_means, p_means, Ek_means, Ep_means, E_totals, deltas_x,deltas_p,productos_deltas_normalizados):
     print(f"t = {T} fs: <x>={x_val:.3e} m, <p>={p_val:.3e} kg·m/s, <Ek>={Ek_val/eV:.3f} eV, <Ep>={Ep_val/eV:.3f} eV, <E>={E_val/eV:.3f} eV ", fr"$\delta x = {delta_x}$", fr"$\delta p = {delta_p}$",fr"$deltas/(hbar/2) = {producto_deltas_normalizado}$" )
 
 
