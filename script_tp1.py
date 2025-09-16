@@ -59,12 +59,12 @@ V = np.zeros(Nx)
 # Escalón de potencial
 
 # 0.025 eV
-V[x < Lx/2] = 0*eV
-V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
+#V[x < Lx/2] = 0*eV
+#V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
 
 # 0.25 eV
-# V[x < Lx/2] = 0*eV
-# V[x >= Lx/2] =0.25 * eV  # 0.25 eV a partir de x = Lx/2
+V[x < Lx/2] = 0*eV
+V[x >= Lx/2] =0.25 * eV  # 0.25 eV a partir de x = Lx/2
 
 
 # # Potencial barrera
@@ -98,6 +98,8 @@ p_means = []
 Ek_means = []
 Ep_means = []
 E_totals = []
+deltas_x = []
+deltas_p = []
 
 # --- Snapshots ---
 psi_sqr_snapshots = []
@@ -147,12 +149,23 @@ for n in range(Nt):
             psi_conj = np.conjugate(psi)
 
             x_mean = np.sum(np.abs(psi)**2 * x) * dx
+            x_mean_2 = np.sum(np.abs(psi)**2 * x**2) * dx
             grad_psi = (np.roll(psi, -1) - np.roll(psi, 1)) / (2*dx)
             p_mean = np.sum(psi_conj * (-1j*hbar) * grad_psi) * dx
+           
             lap_psi = (np.roll(psi, -1) - 2*psi + np.roll(psi, 1)) / dx**2
             Ek_mean = np.real(np.sum(psi_conj * (-hbar**2/(2*m)) * lap_psi) * dx)
             Ep_mean = np.real(np.sum(psi_conj * V * psi) * dx)
+            p_mean_2 = 2 * m * Ek_mean
             E_total = Ek_mean + Ep_mean
+
+            # Incertidumbre de x: delta x = 2 * sqrt(<x^2> - <x>^2)
+            delta_x = 2 * np.sqrt(x_mean_2 - x_mean**2)
+
+# Incertidumbre de p: delta p = 2 * sqrt(<p^2> - <p>^2)
+# We use np.real() to handle the complex numbers properly, as p_mean is complex.
+            delta_p = 2 * np.sqrt(np.real(p_mean_2) - np.real(p_mean)**2)
+
 
             # Guardar en las listas
             x_means.append(x_mean)
@@ -160,6 +173,8 @@ for n in range(Nt):
             Ek_means.append(Ek_mean)
             Ep_means.append(Ep_mean)
             E_totals.append(E_total)
+            deltas_x.append(delta_x)
+            deltas_p.append(delta_p)
 
     # Guardar snapshots cada cierto tiempo
     if n % 400 == 0:
@@ -186,8 +201,8 @@ plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f
   
     
     
-for T, x_val, p_val, Ek_val, Ep_val, E_val in zip(target_times, x_means, p_means, Ek_means, Ep_means, E_totals):
-    print(f"t = {T} fs: <x>={x_val:.3e} m, <p>={p_val:.3e} kg·m/s, <Ek>={Ek_val/eV:.3f} eV, <Ep>={Ep_val/eV:.3f} eV, <E>={E_val/eV:.3f} eV")
+for T, x_val, p_val, Ek_val, Ep_val, E_val, delta_x, delta_p in zip(target_times, x_means, p_means, Ek_means, Ep_means, E_totals, deltas_x,deltas_p):
+    print(f"t = {T} fs: <x>={x_val:.3e} m, <p>={p_val:.3e} kg·m/s, <Ek>={Ek_val/eV:.3f} eV, <Ep>={Ep_val/eV:.3f} eV, <E>={E_val/eV:.3f} eV ", fr"$\delta x = {delta_x}$", fr"$\delta p = {delta_p}$")
 
 
 #plt.plot(x*1e9, V/eV, linestyle='--', color='gray', label="V(x) [eV]")
