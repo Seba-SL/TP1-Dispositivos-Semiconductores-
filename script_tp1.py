@@ -59,12 +59,12 @@ V = np.zeros(Nx)
 # Escalón de potencial
 
 # 0.025 eV
-V[x < Lx/2] = 0*eV
-V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
+#V[x < Lx/2] = 0*eV
+#V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
 
 # 0.25 eV
-#V[x < Lx/2] = 0*eV
-#V[x >= Lx/2] =0.25 * eV  # 0.25 eV a partir de x = Lx/2
+# V[x < Lx/2] = 0*eV
+# V[x >= Lx/2] =0.25 * eV  # 0.25 eV a partir de x = Lx/2
 
 
 # # Potencial barrera
@@ -112,8 +112,8 @@ plt.figure(figsize=(8,5))
 
 #Solo Para condiciones iniciales
 #Componentes Real e imaginaria en tiempo 0 
-#plt.plot(x*1e9, psi_real*5000, label=fr"$\Psi_Real, \; t = {0:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
-#plt.plot(x*1e9, psi_imag*5000, label=fr"$\Psi_Imag, \; t = {0:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
+# plt.plot(x*1e9, 2e-14*psi_real*max_densidad, label=fr"$\Psi Real, \; t = {0:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
+# plt.plot(x*1e9,2e-14*psi_imag*max_densidad, label=fr"$\Psi Imag, \; t = {0:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
 
 #Solo Para condiciones iniciales
 #target_times = [0]  # en femtosegundos
@@ -199,7 +199,7 @@ for n in range(Nt):
 
 tolerance = 0.5  # tolerancia en fs para encontrar el snapshot más cercano
 for psi_sqr, t in zip(psi_sqr_snapshots, times):
-     # revisar si t está cerca de alguno de los tiempos objetivo
+   #  revisar si t está cerca de alguno de los tiempos objetivo
      if any(abs(t - T) < tolerance for T in target_times):
          plt.plot(x*1e9, Ek0_eV*(psi_sqr/max_densidad), label=fr"$|\Psi|^2, \; t = {t:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
 
