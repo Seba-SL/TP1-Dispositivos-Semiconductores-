@@ -46,7 +46,7 @@ envelope = np.exp(-(x-x0)**2/(2*sigma**2))
 psi_real = envelope * np.cos(k0*(x-x0))
 psi_imag = envelope * np.sin(k0*(x-x0))
 
-
+max_densidad = 1/(np.sqrt(np.pi)*sigma)
 
 
 
@@ -59,8 +59,8 @@ V = np.zeros(Nx)
 # Escalón de potencial
 
 # 0.025 eV
-#V[x < Lx/2] = 0*eV
-#V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
+V[x < Lx/2] = 0*eV
+V[x >= Lx/2] =0.025 * eV  # 0.025 eV a partir de x = Lx/2
 
 # 0.25 eV
 #V[x < Lx/2] = 0*eV
@@ -68,18 +68,18 @@ V = np.zeros(Nx)
 
 
 # # Potencial barrera
-Ebarr = 0.150 * eV  # convertir eV a Joules
-d_nm = 10           # ancho en nanómetros, cambia a 1, 2 o 10 según el caso
-d = d_nm * 1e-9     # convertir a metros
+# Ebarr = 0.150 * eV  # convertir eV a Joules
+# d_nm = 10           # ancho en nanómetros, cambia a 1, 2 o 10 según el caso
+# d = d_nm * 1e-9     # convertir a metros
 
-V = np.zeros(Nx)    # inicializar el potencial
-x_start = Lx/2
+# V = np.zeros(Nx)    # inicializar el potencial
+# x_start = Lx/2
 
-# # # indices de la barrera
-idx_start = np.argmin(np.abs(x - x_start))
-idx_end   = np.argmin(np.abs(x - (x_start + d)))
+# # # # indices de la barrera
+# idx_start = np.argmin(np.abs(x - x_start))
+# idx_end   = np.argmin(np.abs(x - (x_start + d)))
 
-V[idx_start:idx_end] = Ebarr
+# V[idx_start:idx_end] = Ebarr
 
 
 ##############################################################################################
@@ -90,7 +90,6 @@ V[idx_start:idx_end] = Ebarr
 norm = np.sqrt(np.trapz(psi_real**2 + psi_imag**2, x))
 psi_real /= norm
 psi_imag /= norm
-
 
 # Listas para guardar valores esperados
 x_means = []
@@ -135,8 +134,12 @@ for n in range(Nt):
     lap_real = (np.roll(psi_real_new, -1) - 2*psi_real_new + np.roll(psi_real_new, 1)) / dx**2
     psi_imag_new = psi_imag + (hbar*dt/(2*m)) * lap_real - (dt/hbar)*V*psi_real_new
 
+    
+    norm = np.sqrt(np.trapz(psi_real_new**2 + psi_imag_new**2, x))
+
     # Actualizar variables
-    psi_real, psi_imag = psi_real_new, psi_imag_new
+    psi_real, psi_imag = psi_real_new/norm, psi_imag_new/norm
+
 
     # Calcular densidad de probabilidad
     prob_density = psi_real**2 + psi_imag**2
@@ -165,8 +168,7 @@ for n in range(Nt):
             delta_x = 2 * np.sqrt(x_mean_2 - x_mean**2)
 
             
-# Incertidumbre de p: delta p = 2 * sqrt(<p^2> - <p>^2)
-# We use np.real() to handle the complex numbers properly, as p_mean is complex.
+            # Incertidumbre de p: delta p = 2 * sqrt(<p^2> - <p>^2)
             delta_p = 2 * np.sqrt(np.real(p_mean_2) - np.real(p_mean)**2)
 
             
@@ -188,7 +190,8 @@ for n in range(Nt):
     if n % 400 == 0:
         psi_sqr_snapshots.append(prob_density.copy())
         times.append(n*dt*1e15)  # en femtosegundos
-        P_total = np.trapz(prob_density, x)
+        #P_total = np.sum(prob_density)*dx
+        P_total = np.trapz(prob_density,x)#toma promedio , es mas preciso 
         print(f"Paso {n}, Probabilidad total: {P_total:.6f}")
 
 
@@ -196,16 +199,16 @@ for n in range(Nt):
 
 tolerance = 0.5  # tolerancia en fs para encontrar el snapshot más cercano
 for psi_sqr, t in zip(psi_sqr_snapshots, times):
-    # revisar si t está cerca de alguno de los tiempos objetivo
-    if any(abs(t - T) < tolerance for T in target_times):
-        plt.plot(x*1e9, psi_sqr, label=fr"$|\Psi|^2, \; t = {t:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
+     # revisar si t está cerca de alguno de los tiempos objetivo
+     if any(abs(t - T) < tolerance for T in target_times):
+         plt.plot(x*1e9, Ek0_eV*(psi_sqr/max_densidad), label=fr"$|\Psi|^2, \; t = {t:.0f}\ \mathrm{{fs}}$", alpha=0.9, linewidth=3)
 
 
 #Casos Escalones y Particula libre 
-#plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV " , color ="gray", linewidth = 3 )
+plt.plot(x*1e9,(V/eV),linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV " , color ="gray", linewidth = 3 )
   
 #caso barreras   
-plt.plot(x*1e9,(V/eV)*1e9,linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV , d = {d_nm} nm" , color ="gray", linewidth = 3 )
+#plt.plot(x*1e9,(V/eV),linestyle = "--", label=f"V(x = Lx/2) = {V[idx]/eV:.3f} eV , d = {d_nm} nm" , color ="gray", linewidth = 3 )
   
     
     
@@ -236,4 +239,3 @@ plt.xlabel("x (nm)")
 plt.ylabel("Densidad de probabilidad")
 plt.legend()
 plt.show()
-
